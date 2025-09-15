@@ -24,7 +24,7 @@
   - Edit → makes content editable
   - Regenerate → calls AI API again
   - Approve → enables Send button
-  - Send → calls POST `/api/content/send` (mock sending)
+  - Send → calls POST `/api/content/send`
 
 ## Non-Functional
 - Responsive UI
