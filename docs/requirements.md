@@ -106,3 +106,64 @@ As a marketer, I want to review, edit, regenerate, approve, and send email conte
 - Toast notifications for success/failure.
 - Accessibility: proper labels, keyboard navigation, good contrast.
 - Save approved content to DB (for history).
+
+---
+
+## 9️⃣ Issues & Task Breakdown
+
+Below are the suggested GitHub issues to create and assign among team members.  
+Each issue should link to the relevant section above and be closed once acceptance criteria are met.
+
+1. **Setup Frontend Skeleton**
+   - Create Vite + React app in `/frontend`
+   - Install `axios`, `react-router-dom`
+   - Setup base routes (`/`, `/details/:cgid`, `/content/:cgid`)
+
+2. **Setup Backend Skeleton**
+   - Create Spring Boot project in `/backend`
+   - Add dependencies: Spring Web, JPA, Validation, Lombok, Postgres Driver
+   - Add base package structure (controller, service, repository)
+
+3. **Setup Postgres Schema + Sample Data**
+   - Create `customers` table (cgid, first_name, last_name, mobile, type, gender, address)
+   - Insert 3–4 sample records
+   - Configure `application.yml` for local Postgres
+
+4. **Build `GET /customers/{cgid}` API**
+   - Implement repository query to fetch by CGID
+   - Return `404` if not found
+   - Write unit test for service
+
+5. **Build `POST /content/generate` API (Mock AI)**
+   - Accept payload with `cgid` and `context`
+   - Generate mock text (or call real AI if available)
+   - Return generated content
+
+6. **Build `POST /content/send` API (Mock Email)**
+   - Accept payload with `cgid` and `final content`
+   - Log “Email sent to <cgid>” in backend console
+   - Return success response
+
+7. **Search Screen**
+   - Implement UI with CGID input + Search button
+   - Call backend API and handle errors
+
+8. **Details Screen**
+   - Display customer details
+   - Editable first/last name, masked mobile
+   - Context text box + Generate Content button
+
+9. **Content Screen**
+   - Show generated content
+   - Implement Edit, Regenerate, Approve, Send flow
+
+10. **CI Workflow Setup**
+    - Add GitHub Actions workflow for:
+      - Backend: `mvn verify`
+      - Frontend: `npm install && npm run build`
+    - Enable “require status checks to pass” in branch protection
+
+11. **Styling + Validation**
+    - Add responsive styles
+    - Input validation (non-empty CGID, min length for personalization)
+    - Accessibility checks (labels, keyboard navigation)
