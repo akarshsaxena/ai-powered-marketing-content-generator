@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,43 +9,78 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, MapPin } from "lucide-react";
 
 const CustomerDetails = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // CGID
   const navigate = useNavigate();
+
   const [customerData, setCustomerData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    mobileNumber: "+1234567890",
-    gender: "Male",
-    customerType: "Premium",
-    address: "123 Main St, New York, NY 10001",
+    fullName: "",
+    email: "",
+    phone: "",
+    gender: "",
+    customerType: "",
+    city: "",
+    state: "",
+    country: "",
+    pincode: "",
     contentRequirement: ""
   });
+  const [error, setError] = useState("");
+
+  const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
+  const customerTypeOptions = ["Regular", "Corporate", "Premium", "HNI"];
+
+  useEffect(() => {
+    const fetchCustomer = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/api/customers/${id}`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log(data)
+          setCustomerData({
+            fullName: data.fullName,
+            email: data.email,
+            phone: data.phone,
+            gender: data.gender,
+            customerType: data.customerType,
+            city: data.city,
+            state: data.state,
+            country: data.country,
+            pincode: data.pincode,
+            contentRequirement: ""
+          });
+        } else if (response.status === 404) {
+          setError("Customer not found");
+        } else {
+          setError("Something went wrong while fetching customer data.");
+        }
+      } catch (err) {
+        setError("Unable to reach backend. Make sure Spring Boot is running.");
+      }
+    };
+
+    fetchCustomer();
+  }, [id]);
 
   const handleInputChange = (field: string, value: string) => {
     setCustomerData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleGenerateContent = () => {
-    navigate("/suggested-content", { 
-      state: { customerData, customerId: id } 
-    });
+    navigate("/suggested-content", { state: { customerData, customerId: id } });
   };
 
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center space-x-4">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate(-1)}
-            className="hover:bg-muted"
-          >
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="hover:bg-muted">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
           <h1 className="text-3xl font-bold">Customer Details</h1>
         </div>
+
+        {error && <div className="bg-destructive text-destructive-foreground p-4 rounded">{error}</div>}
 
         <Card className="shadow-lg">
           <CardHeader>
@@ -54,70 +89,55 @@ const CustomerDetails = () => {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  value={customerData.firstName}
-                  onChange={(e) => handleInputChange("firstName", e.target.value)}
-                />
+                <Label>Full Name</Label>
+                <Input value={customerData.fullName} disabled className="bg-gray-100" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  value={customerData.lastName}
-                  onChange={(e) => handleInputChange("lastName", e.target.value)}
-                />
+                <Label>Email</Label>
+                <Input value={customerData.email} disabled className="bg-gray-100" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="mobile">Mobile Number</Label>
-                <Input
-                  id="mobile"
-                  value={customerData.mobileNumber}
-                  onChange={(e) => handleInputChange("mobileNumber", e.target.value)}
-                />
+                <Label>Phone</Label>
+                <Input value={customerData.phone} disabled className="bg-gray-100" />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="gender">Gender</Label>
+                <Label>Gender</Label>
                 <Select value={customerData.gender} onValueChange={(value) => handleInputChange("gender", value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Male">Male</SelectItem>
-                    <SelectItem value="Female">Female</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
-                    <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                    {genderOptions.map(g => <SelectItem key={g} value={g}>{g}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="customerType">Type of Customer</Label>
+                <Label>Customer Type</Label>
                 <Select value={customerData.customerType} onValueChange={(value) => handleInputChange("customerType", value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Premium">Premium</SelectItem>
-                    <SelectItem value="Standard">Standard</SelectItem>
-                    <SelectItem value="Basic">Basic</SelectItem>
-                    <SelectItem value="VIP">VIP</SelectItem>
+                    {customerTypeOptions.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
+              
               <div className="space-y-2">
-                <Label>Address</Label>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    value={customerData.address}
-                    onChange={(e) => handleInputChange("address", e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button variant="link" className="text-primary hover:text-primary/80 p-0">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    View Address
-                  </Button>
-                </div>
+                <Label>City</Label>
+                <Input value={customerData.city} onChange={(e) => handleInputChange("city", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>State</Label>
+                <Input value={customerData.state} onChange={(e) => handleInputChange("state", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Country</Label>
+                <Input value={customerData.country} onChange={(e) => handleInputChange("country", e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Pincode</Label>
+                <Input value={customerData.pincode} onChange={(e) => handleInputChange("pincode", e.target.value)} />
               </div>
             </div>
 
@@ -133,11 +153,7 @@ const CustomerDetails = () => {
             </div>
 
             <div className="flex justify-end">
-              <Button 
-                onClick={handleGenerateContent}
-                size="lg"
-                className="px-8"
-              >
+              <Button onClick={handleGenerateContent} size="lg" className="px-8">
                 Generate Content
               </Button>
             </div>

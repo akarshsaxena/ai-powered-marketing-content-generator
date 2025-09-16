@@ -32,6 +32,9 @@ public class Customer {
     private String customerType;
 
     @Column(nullable = false)
+    private String gender;
+
+    @Column(nullable = false)
     private String city;
 
     @Column(nullable = false)

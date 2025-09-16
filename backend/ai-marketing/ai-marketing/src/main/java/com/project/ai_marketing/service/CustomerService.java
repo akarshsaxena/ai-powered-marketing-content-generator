@@ -35,6 +35,7 @@ public class CustomerService {
                 .cgid(customer.getCgid())
                 .fullName(customer.getFullName())
                 .email(maskedEmail)
+                .gender(customer.getGender())
                 .phone(maskedPhone)
                 .customerType(customer.getCustomerType())
                 .city(customer.getCity())
