@@ -3,33 +3,18 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, CheckCircle, XCircle, RefreshCw, Send } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, RefreshCw, Send, Pencil } from "lucide-react";
 import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
 
 const SuggestedContent = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { customerData, customerId } = location.state || {};
+  const { customerData, customerId, generatedEmail } = location.state || {};
   const [isApproved, setIsApproved] = useState(false);
-  const [content, setContent] = useState(
-    `Dear ${customerData?.firstName || "Valued Customer"},
-
-We're excited to introduce our latest premium collection that we believe perfectly matches your sophisticated taste and lifestyle preferences.
-
-As one of our ${customerData?.customerType || "valued"} customers, you have exclusive early access to our newest arrivals featuring:
-
-• Handcrafted premium products designed for discerning customers
-• Limited edition items available only to our select clientele  
-• Complimentary consultation services tailored to your preferences
-• Priority shipping and white-glove delivery service
-
-Based on your previous purchases and preferences, we've curated a personalized selection that we believe will exceed your expectations.
-
-Would you like to schedule a private viewing at your convenience? Our personal shopping specialists are ready to assist you.
-
-Best regards,
-The MarketingIQ Team`
-  );
+  const [content, setContent] = useState(generatedEmail || "");
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const qualityScore = 92;
 
@@ -40,12 +25,12 @@ The MarketingIQ Team`
 
   const handleReject = () => {
     toast.error("Content rejected. Please regenerate or modify.");
+    navigate(-1)
     setIsApproved(false);
   };
 
   const handleRegenerate = () => {
     toast.info("Regenerating content...");
-    // Simulate content regeneration
     setTimeout(() => {
       setContent(content.replace("excited", "thrilled").replace("sophisticated", "refined"));
       toast.success("New content generated!");
@@ -93,23 +78,40 @@ The MarketingIQ Team`
         </div>
 
         <Card className="shadow-lg">
-          <CardHeader>
+          <CardHeader className="flex items-center justify-between">
             <CardTitle className="text-xl">
               Generated Content for {customerData.firstName} {customerData.lastName} ({customerId})
             </CardTitle>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => setIsEditing(!isEditing)}
+              className="flex items-center space-x-1"
+            >
+              <Pencil className="h-4 w-4" />
+              <span>{isEditing ? "Lock" : "Edit"}</span>
+            </Button>
           </CardHeader>
+
           <CardContent className="space-y-6">
             <div className="bg-muted/30 p-6 rounded-lg">
-              <pre className="whitespace-pre-wrap font-sans text-foreground leading-relaxed">
-                {content}
-              </pre>
+              {isEditing ? (
+                <Textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="min-h-[150px] font-sans text-foreground leading-relaxed"
+                />
+              ) : (
+                <pre className="whitespace-pre-wrap font-sans text-foreground leading-relaxed">
+                  {content}
+                </pre>
+              )}
             </div>
 
             <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
               <Button
                 onClick={handleApprove}
                 className={`flex items-center space-x-2 ${isApproved ? 'bg-green-600 hover:bg-green-700' : ''}`}
-                variant={isApproved ? "default" : "default"}
               >
                 <CheckCircle className="h-4 w-4" />
                 <span>Approve</span>

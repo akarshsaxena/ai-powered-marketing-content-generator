@@ -11,7 +11,7 @@ const CustomerSearch = () => {
   const navigate = useNavigate();
 
   const handleSearch = () => {
-    if (customerId.trim()) {
+   if (customerId.trim()) {
       navigate(`/customer-details/${customerId}`);
     }
   };
@@ -42,11 +42,15 @@ const CustomerSearch = () => {
                 onKeyPress={handleKeyPress}
                 className="text-lg h-12"
               />
+              {!customerId.trim() && (
+              <p className="text-red-600 text-sm">Please enter a Customer ID to search.</p>
+            )}
             </div>
             <Button 
               onClick={handleSearch}
               className="w-full h-12 text-lg font-medium"
               size="lg"
+              disabled={!customerId.trim()} // disable if empty
             >
               Search
             </Button>
