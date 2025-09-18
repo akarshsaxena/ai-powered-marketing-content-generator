@@ -37,14 +37,33 @@ const SuggestedContent = () => {
     }, 1500);
   };
 
-  const handleSend = () => {
-    if (isApproved) {
-      toast.success("Content sent successfully!");
-      setTimeout(() => {
-        navigate("/");
-      }, 2000);
+  const handleSend = async () => {
+    if (!isApproved) return;
+  
+    setLoading(true);
+    try {
+      const response = await fetch("http://localhost:8080/api/marketing/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cgid: customerId,
+          subject: `Special Offer That You Cannot Miss`,
+          bodyHtml: content,
+        }),
+      });
+  
+      if (response.ok) {
+        toast.success("Email sent successfully!");
+      } else {
+        toast.error("Failed to send email. Try again.");
+      }
+    } catch (error) {
+      toast.error("Error while sending email.");
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   if (!customerData) {
     return (
@@ -63,6 +82,11 @@ const SuggestedContent = () => {
 
   return (
     <div className="min-h-screen bg-background p-4">
+      {loading && (
+      <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+      </div>
+    )}
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center space-x-4">
           <Button 

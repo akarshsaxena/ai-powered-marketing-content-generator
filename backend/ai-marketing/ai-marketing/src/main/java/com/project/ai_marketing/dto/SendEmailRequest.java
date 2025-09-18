@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MarketingEmailResponse {
-    private String generatedEmail;
+public class SendEmailRequest {
+    private String cgid;
+    private String subject;
+    private String bodyHtml;
+
 }
