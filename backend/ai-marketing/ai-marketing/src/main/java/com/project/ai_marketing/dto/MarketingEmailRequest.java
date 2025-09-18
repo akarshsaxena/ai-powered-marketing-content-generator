@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class MarketingEmailRequest {
     private String cgid;
     private String requirement;
+    private String editedContent;
 }

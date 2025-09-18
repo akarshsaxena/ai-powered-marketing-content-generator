@@ -29,13 +29,35 @@ const SuggestedContent = () => {
     setIsApproved(false);
   };
 
-  const handleRegenerate = () => {
-    toast.info("Regenerating content...");
-    setTimeout(() => {
-      setContent(content.replace("excited", "thrilled").replace("sophisticated", "refined"));
-      toast.success("New content generated!");
-    }, 1500);
-  };
+    const handleRegenerate = async () => {
+        toast.info("Regenerating content...");
+        setLoading(true);
+
+        try {
+            const response = await fetch("http://localhost:8080/api/marketing/regenerate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    cgid: customerId,
+                    requirement: content, // current content or user's edits
+                    editedContent: content // optional: pass user's edits explicitly
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setContent(data.generatedEmail || data.email || ""); // update content with regenerated email
+                toast.success("Content regenerated successfully!");
+            } else {
+                toast.error("Failed to regenerate content. Try again.");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Error while regenerating content.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
   const handleSend = async () => {
     if (!isApproved) return;
@@ -133,13 +155,13 @@ const SuggestedContent = () => {
             </div>
 
             <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-              <Button
-                onClick={handleApprove}
-                className={`flex items-center space-x-2 ${isApproved ? 'bg-green-600 hover:bg-green-700' : ''}`}
-              >
-                <CheckCircle className="h-4 w-4" />
-                <span>Approve</span>
-              </Button>
+                <Button
+                    onClick={handleApprove}
+                    className={`flex items-center space-x-2 ${isApproved ? 'bg-green-600 hover:bg-green-700' : ''}`}
+                >
+                    <CheckCircle className="h-4 w-4" />
+                    <span>Approve</span>
+                </Button>
               
               <Button
                 onClick={handleReject}
@@ -158,15 +180,15 @@ const SuggestedContent = () => {
                 <RefreshCw className="h-4 w-4" />
                 <span>Regenerate</span>
               </Button>
-              
-              <Button
-                onClick={handleSend}
-                disabled={!isApproved}
-                className={`flex items-center space-x-2 ${!isApproved ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                <Send className="h-4 w-4" />
-                <span>Send</span>
-              </Button>
+
+                <Button
+                    onClick={handleSend}
+                    disabled={!isApproved}
+                    className={`flex items-center space-x-2 ${!isApproved ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                    <Send className="h-4 w-4" />
+                    <span>Send</span>
+                </Button>
             </div>
 
             <Alert className="bg-green-50 border-green-200 text-green-800">

@@ -31,6 +31,19 @@ public class MarketingEmailController {
         return ResponseEntity.ok(new MarketingEmailResponse(generatedEmail));
     }
 
+    @PostMapping("/regenerate")
+    public ResponseEntity<MarketingEmailResponse> regenerateEmail(
+            @RequestBody MarketingEmailRequest request) {
+
+        String input = (request.getEditedContent() != null && !request.getEditedContent().isBlank())
+                ? request.getEditedContent()
+                : request.getRequirement();
+
+        String regeneratedEmail = geminiService.generateEmail(request.getCgid(), input);
+
+        return ResponseEntity.ok(new MarketingEmailResponse(regeneratedEmail));
+    }
+
     @PostMapping("/send")
     public ResponseEntity<MarketingEmailResponse> sendEmail(@RequestBody SendEmailRequest req) {
         if (req.getCgid() == null || req.getCgid().isBlank()) {
