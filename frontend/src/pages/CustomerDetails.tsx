@@ -77,10 +77,12 @@ const CustomerDetails = () => {
       const response = await fetch("http://localhost:8080/api/marketing/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cgid: id, // from useParams()
-          requirement: customerData.contentRequirement,
-        }),
+          body: JSON.stringify({
+              cgid: id,
+              requirement: customerData.contentRequirement,
+              customerType: customerData.customerType // <- new: send selected value
+          }),
+
       });
   
       if (response.ok) {

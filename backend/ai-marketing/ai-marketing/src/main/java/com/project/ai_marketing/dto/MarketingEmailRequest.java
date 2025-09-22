@@ -1,3 +1,19 @@
+//package com.project.ai_marketing.dto;
+//
+//import lombok.AllArgsConstructor;
+//import lombok.Builder;
+//import lombok.Data;
+//import lombok.NoArgsConstructor;
+//
+//@Data
+//@NoArgsConstructor
+//@AllArgsConstructor
+//@Builder
+//public class MarketingEmailRequest {
+//    private String cgid;
+//    private String requirement;
+//    private String editedContent;
+//}
 package com.project.ai_marketing.dto;
 
 import lombok.AllArgsConstructor;
@@ -13,4 +29,5 @@ public class MarketingEmailRequest {
     private String cgid;
     private String requirement;
     private String editedContent;
+    private String customerType; // NEW: override from UI
 }

@@ -18,7 +18,6 @@ public class GeminiService {
     private final RestTemplate restTemplate;
     private final String apiKey;
     private final String apiUrl;
-    private final String bankName = "NAB";
 
     public GeminiService(
             CustomerRepository customerRepository,
@@ -34,43 +33,86 @@ public class GeminiService {
     }
 
 
-    public String generateEmail(String cgid,String requirement) {
-        Customer customer = customerRepository.findByCgid(cgid)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+//    public String generateEmail(String cgid,String requirement,String overrideCustomerType) {
+//        Customer customer = customerRepository.findByCgid(cgid)
+//                .orElseThrow(() -> new RuntimeException("Customer not found"));
+//
+//        String prompt = """
+//            You are an AI assistant specialized in personalized marketing.
+//            Generate a professional marketing email for the following customer:
+//
+//            Customer Details:
+//            - Full Name: %s
+//            - Gender: %s
+//            - Customer Type: %s
+//            - Location: %s, %s, %s, %s
+//
+//            Marketing Requirement:
+//            %s
+//
+//            Bank Details:
+//            - Bank Name: %s
+//
+//            Guidelines:
+//            - Use customer name in greeting.
+//            - Tailor tone according to customer type: %s.
+//            - Keep tone professional, engaging, and concise.
+//            - Do not reveal PII like email/phone directly.
+//            """.formatted(
+//                customer.getFullName(),
+//                customer.getGender(),
+//                customer.getCustomerType(),
+//                customer.getCity(),
+//                customer.getState(),
+//                customer.getCountry(),
+//                customer.getPincode(),
+//                requirement,
+//                bankName,
+//                customer.getCustomerType()
+//        );
+public String generateEmail(String cgid, String requirement, String overrideCustomerType) {
+    Customer customer = customerRepository.findByCgid(cgid)
+            .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        String prompt = """
-            You are an AI assistant specialized in personalized marketing.
-            Generate a professional marketing email for the following customer:
+    // use UI override if provided, otherwise DB value
+    String effectiveCustomerType = (overrideCustomerType != null && !overrideCustomerType.isBlank())
+            ? overrideCustomerType
+            : customer.getCustomerType();
 
-            Customer Details:
-            - Full Name: %s
-            - Gender: %s
-            - Customer Type: %s
-            - Location: %s, %s, %s, %s
+    String bankName = "NAB";
+    String prompt = """
+        You are an AI assistant specialized in personalized marketing.
+        Generate a professional marketing email for the following customer:
 
-            Marketing Requirement:
-            %s
+        Customer Details:
+        - Full Name: %s
+        - Gender: %s
+        - Customer Type: %s
+        - Location: %s, %s, %s, %s
 
-            Bank Details:
-            - Bank Name: %s
+        Marketing Requirement:
+        %s
 
-            Guidelines:
-            - Use customer name in greeting.
-            - Tailor tone according to customer type: %s.
-            - Keep tone professional, engaging, and concise.
-            - Do not reveal PII like email/phone directly.
-            """.formatted(
-                customer.getFullName(),
-                customer.getGender(),
-                customer.getCustomerType(),
-                customer.getCity(),
-                customer.getState(),
-                customer.getCountry(),
-                customer.getPincode(),
-                requirement,
-                bankName,
-                customer.getCustomerType()
-        );
+        Bank Details:
+        - Bank Name: %s
+
+        Guidelines:
+        - Use customer name in greeting.
+        - Tailor tone according to customer type: %s.
+        - Keep tone professional, engaging, and concise.
+        - Do not reveal PII like email/phone directly.
+        """.formatted(
+            customer.getFullName(),
+            customer.getGender(),
+            effectiveCustomerType,
+            customer.getCity(),
+            customer.getState(),
+            customer.getCountry(),
+            customer.getPincode(),
+            requirement,
+            bankName,
+            effectiveCustomerType // tone guidance
+    );
         log.info("GEMINI prompt - {}", prompt);
 
         Map<String, Object> requestBody = Map.of(

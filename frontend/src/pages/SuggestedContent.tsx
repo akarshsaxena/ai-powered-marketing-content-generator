@@ -39,9 +39,11 @@ const SuggestedContent = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     cgid: customerId,
-                    requirement: content, // current content or user's edits
-                    editedContent: content // optional: pass user's edits explicitly
+                    requirement: content,
+                    editedContent: content,
+                    customerType: customerData?.customerType // <- pass selected type
                 }),
+
             });
 
             if (response.ok) {
@@ -67,11 +69,12 @@ const SuggestedContent = () => {
       const response = await fetch("http://localhost:8080/api/marketing/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cgid: customerId,
-          subject: `Special Offer That You Cannot Miss`,
-          bodyHtml: content,
-        }),
+          body: JSON.stringify({
+              cgid: customerId,
+              requirement: content,
+              editedContent: content,
+              customerType: customerData?.customerType // <- pass selected type
+          }),
       });
   
       if (response.ok) {

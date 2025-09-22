@@ -9,6 +9,7 @@ import CustomerDetails from "./pages/CustomerDetails";
 import SuggestedContent from "./pages/SuggestedContent";
 import NotFound from "./pages/NotFound";
 
+
 const queryClient = new QueryClient();
 
 const App = () => (

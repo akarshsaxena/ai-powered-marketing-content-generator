@@ -1,5 +1,5 @@
 package com.project.ai_marketing.controller;
-
+//package com.project.ai_marketing.dto;
 
 import com.project.ai_marketing.dto.MarketingEmailRequest;
 import com.project.ai_marketing.dto.MarketingEmailResponse;
@@ -26,7 +26,8 @@ public class MarketingEmailController {
     public ResponseEntity<MarketingEmailResponse> generateEmail(
             @RequestBody MarketingEmailRequest request) {
 
-        String generatedEmail = geminiService.generateEmail(request.getCgid(),request.getRequirement());
+        String generatedEmail = geminiService.generateEmail(request.getCgid(), request.getRequirement(), request.getCustomerType());
+
 
         return ResponseEntity.ok(new MarketingEmailResponse(generatedEmail));
     }
@@ -39,7 +40,8 @@ public class MarketingEmailController {
                 ? request.getEditedContent()
                 : request.getRequirement();
 
-        String regeneratedEmail = geminiService.generateEmail(request.getCgid(), input);
+        String regeneratedEmail = geminiService.generateEmail(request.getCgid(), input, request.getCustomerType());
+
 
         return ResponseEntity.ok(new MarketingEmailResponse(regeneratedEmail));
     }
