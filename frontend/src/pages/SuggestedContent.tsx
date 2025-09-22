@@ -61,33 +61,32 @@ const SuggestedContent = () => {
         }
     };
 
-  const handleSend = async () => {
-    if (!isApproved) return;
-  
-    setLoading(true);
-    try {
-      const response = await fetch("http://localhost:8080/api/marketing/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+    const handleSend = async () => {
+      if (!isApproved) return;
+    
+      setLoading(true);
+      try {
+        const response = await fetch("http://localhost:8080/api/marketing/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-              cgid: customerId,
-              requirement: content,
-              editedContent: content,
-              customerType: customerData?.customerType // <- pass selected type
+            cgid: customerId,
+            subject: `Special Offer That You Cannot Miss`,
+            bodyHtml: content,
           }),
-      });
-  
-      if (response.ok) {
-        toast.success("Email sent successfully!");
-      } else {
-        toast.error("Failed to send email. Try again.");
+        });
+    
+        if (response.ok) {
+          toast.success("Email sent successfully!");
+        } else {
+          toast.error("Failed to send email. Try again.");
+        }
+      } catch (error) {
+        toast.error("Error while sending email.");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      toast.error("Error while sending email.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
   
 
   if (!customerData) {
