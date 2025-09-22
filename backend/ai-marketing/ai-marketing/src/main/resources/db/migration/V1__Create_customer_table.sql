@@ -18,7 +18,9 @@ CREATE TABLE customer (
 
 -- Insert 50 mock customers
 INSERT INTO customer (cgid, full_name, email, phone, gender, customer_type, city, state, country, pincode) VALUES
-                                                                                                               ('CGID-100001', 'John Smith', 'vinayak270603@gmail.com', '+1111111111', 'Male', 'Regular', 'New York', 'NY', 'USA', '10001'),
+
+
+                                                                                                              ('CGID-100001', 'John Smith', 'vinayak270603@gmail.com', '+1111111111', 'Male', 'Regular', 'New York', 'NY', 'USA', '10001'),
                                                                                                                ('CGID-100002', 'Jane Doe', 'jane.doe@example.com', '+1111111112', 'Female', 'Corporate', 'Los Angeles', 'CA', 'USA', '90001'),
                                                                                                                ('CGID-100003', 'Michael Johnson', 'michael.johnson@example.com', '+1111111113', 'Male', 'Premium', 'Chicago', 'IL', 'USA', '60007'),
                                                                                                                ('CGID-100004', 'Emily Davis', 'emily.davis@example.com', '+1111111114', 'Female', 'HNI', 'Houston', 'TX', 'USA', '77001'),
@@ -72,3 +74,11 @@ INSERT INTO customer (cgid, full_name, email, phone, gender, customer_type, city
                                                                                                                ('CGID-100048', 'Zoe Stewart', 'zoe.stewart@example.com', '+1111111158', 'Female', 'HNI', 'New Orleans', 'LA', 'USA', '70112'),
                                                                                                                ('CGID-100049', 'Daniel Sanchez', 'daniel.sanchez@example.com', '+1111111159', 'Male', 'Regular', 'Wichita', 'KS', 'USA', '67201'),
                                                                                                                ('CGID-100050', 'Hannah Morris', 'hannah.morris@example.com', '+1111111160', 'Female', 'Corporate', 'Cleveland', 'OH', 'USA', '44101');
+CREATE TABLE marketing_requests (
+  id SERIAL PRIMARY KEY,
+  customer_id VARCHAR(50),
+  email VARCHAR(255),
+  prompt TEXT,
+  status VARCHAR(20) DEFAULT 'Pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
