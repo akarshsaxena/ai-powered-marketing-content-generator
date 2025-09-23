@@ -39,7 +39,7 @@ const SuggestedContent = () => {
 
   const handleReject = () => {
     toast.error("Content rejected. Please regenerate or modify.");
-    navigate(-1);
+    navigate(`/customer-details/${customerId}`);
   };
 
   const handleRegenerate = async () => {
@@ -125,7 +125,7 @@ const SuggestedContent = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(`/customer-details/${customerId}`)}
             className="hover:bg-muted"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

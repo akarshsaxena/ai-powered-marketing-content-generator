@@ -124,7 +124,7 @@ const CustomerDetails = () => {
 
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="hover:bg-muted">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/search")} className="hover:bg-muted">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>

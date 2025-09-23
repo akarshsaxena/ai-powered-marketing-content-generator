@@ -16,6 +16,16 @@ CREATE TABLE customer (
                           pincode VARCHAR(10)
 );
 
+DROP TABLE IF EXISTS marketing_requests;
+CREATE TABLE marketing_requests (
+                                    id SERIAL PRIMARY KEY,
+                                    customer_id VARCHAR(50) NOT NULL,
+                                    customer_type VARCHAR(50),
+                                    email TEXT,
+                                    status VARCHAR(20) DEFAULT 'Pending',
+                                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Insert 50 mock customers
 INSERT INTO customer (cgid, full_name, email, phone, gender, customer_type, city, state, country, pincode) VALUES
 
@@ -74,11 +84,3 @@ INSERT INTO customer (cgid, full_name, email, phone, gender, customer_type, city
                                                                                                                ('CGID-100048', 'Zoe Stewart', 'zoe.stewart@example.com', '+1111111158', 'Female', 'HNI', 'New Orleans', 'LA', 'USA', '70112'),
                                                                                                                ('CGID-100049', 'Daniel Sanchez', 'daniel.sanchez@example.com', '+1111111159', 'Male', 'Regular', 'Wichita', 'KS', 'USA', '67201'),
                                                                                                                ('CGID-100050', 'Hannah Morris', 'hannah.morris@example.com', '+1111111160', 'Female', 'Corporate', 'Cleveland', 'OH', 'USA', '44101');
-CREATE TABLE marketing_requests (
-  id SERIAL PRIMARY KEY,
-  customer_id VARCHAR(50),
-  email VARCHAR(255),
-  prompt TEXT,
-  status VARCHAR(20) DEFAULT 'Pending',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);

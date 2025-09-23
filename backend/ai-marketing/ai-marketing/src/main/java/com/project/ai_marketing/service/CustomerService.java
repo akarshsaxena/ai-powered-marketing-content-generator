@@ -1,18 +1,24 @@
 package com.project.ai_marketing.service;
 
+import com.project.ai_marketing.dto.AllEmailResponse;
 import com.project.ai_marketing.dto.CustomerDTO;
 import com.project.ai_marketing.entity.Customer;
+import com.project.ai_marketing.entity.MarketingRequests;
 import com.project.ai_marketing.repository.CustomerRepository;
+import com.project.ai_marketing.repository.MarketingRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final MarketingRequestRepository marketingRequestRepository;
 
     public Optional<CustomerDTO> getCustomerByCgid(String cgid) {
         return customerRepository.findByCgid(cgid)
@@ -44,4 +50,29 @@ public class CustomerService {
                 .pincode(customer.getPincode())
                 .build();
     }
+
+    public MarketingRequests saveStatus(String customerId,String customerType, String email, String status) {
+        MarketingRequests entry = MarketingRequests.builder()
+                .customerId(customerId)
+                .customerType(customerType)
+                .email(email)
+                .status(status)
+                .build();
+        return marketingRequestRepository.save(entry);
+    }
+
+    public List<AllEmailResponse> getAllEmails() {
+        return marketingRequestRepository.findAll()
+                .stream()
+                .map(req -> new AllEmailResponse(
+                        req.getCustomerId(),
+                        req.getCustomerType(),
+                        req.getEmail(),
+                        req.getStatus()
+                ))
+                .collect(Collectors.toList());
+
+    }
+
+
 }
