@@ -31,6 +31,40 @@ const CustomerDetails = () => {
 
   const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
   const customerTypeOptions = ["Regular", "Corporate", "Premium", "HNI"];
+const marketingOptionsByType: Record<string, string[]> = {
+  Regular: [
+    "Personal Loan Offers",
+    "Savings Account Benefits",
+    "Credit Card Rewards Program",
+    "Car Loan Financing Options",
+    "Fixed Deposit Investment Plans",
+  ],
+  Corporate: [
+    "Corporate Loan Solutions",
+    "Payroll Account Benefits",
+    "Business Credit Cards",
+    "Employee Insurance Packages",
+    "Working Capital Financing",
+  ],
+  Premium: [
+    "Exclusive Wealth Management Services",
+    "Premium Credit Card Rewards",
+    "High-Value Insurance Policies",
+    "Priority Banking Services",
+    "Retirement Planning Solutions",
+  ],
+  HNI: [
+    "Ultra High Net Worth Investment Plans",
+    "Private Banking Privileges",
+    "Global Investment Opportunities",
+    "Exclusive Mutual Fund Investment Offers",
+    "Bespoke Wealth Management Services",
+  ],
+};
+const selectedMarketingOptions =
+  marketingOptionsByType[customerData.customerType] || [];
+
+
 
   useEffect(() => {
     const fetchCustomer = async () => {
@@ -210,6 +244,21 @@ const CustomerDetails = () => {
 
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Describe Content Requirement</h3>
+              {/* ✅ New Dropdown */}
+                <Select 
+                  onValueChange={(value) => handleInputChange("contentRequirement", value)}
+                >
+                  <SelectTrigger className="w-[250px]">
+                    <SelectValue placeholder="Choose marketing option" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {selectedMarketingOptions.map(option => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               <Textarea
                 placeholder="Describe the marketing content you need for this customer..."
                 value={customerData.contentRequirement}
