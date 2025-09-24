@@ -9,10 +9,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ArrowLeft, MapPin } from "lucide-react";
 
 const CustomerDetails = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-
+  const [showAddress, setShowAddress] = useState(false);
+  const [error, setError] = useState("");
 
   const [customerData, setCustomerData] = useState({
     fullName: "",
@@ -24,56 +25,70 @@ const CustomerDetails = () => {
     state: "",
     country: "",
     pincode: "",
-    contentRequirement: ""
+    contentRequirement: "",
   });
-  const [error, setError] = useState("");
-  const [showAddress, setShowAddress] = useState(false);
+
+  const marketingOptionsByType: Record<string, string[]> = {
+    Regular: [
+      "Personal Loan Offers",
+      "Savings Account Benefits",
+      "Credit Card Rewards Program",
+      "Car Loan Financing Options",
+      "Fixed Deposit Investment Plans",
+    ],
+    Corporate: [
+      "Corporate Loan Solutions",
+      "Payroll Account Benefits",
+      "Business Credit Cards",
+      "Employee Insurance Packages",
+      "Working Capital Financing",
+    ],
+    Premium: [
+      "Exclusive Wealth Management Services",
+      "Premium Credit Card Rewards",
+      "High-Value Insurance Policies",
+      "Priority Banking Services",
+      "Retirement Planning Solutions",
+    ],
+    HNI: [
+      "Ultra High Net Worth Investment Plans",
+      "Private Banking Privileges",
+      "Global Investment Opportunities",
+      "Exclusive Mutual Fund Investment Offers",
+      "Bespoke Wealth Management Services",
+    ],
+  };
+  const selectedMarketingOptions =
+    marketingOptionsByType[customerData.customerType] || [];
 
   const genderOptions = ["Male", "Female", "Other", "Prefer not to say"];
   const customerTypeOptions = ["Regular", "Corporate", "Premium", "HNI"];
-const marketingOptionsByType: Record<string, string[]> = {
-  Regular: [
-    "Personal Loan Offers",
-    "Savings Account Benefits",
-    "Credit Card Rewards Program",
-    "Car Loan Financing Options",
-    "Fixed Deposit Investment Plans",
-  ],
-  Corporate: [
-    "Corporate Loan Solutions",
-    "Payroll Account Benefits",
-    "Business Credit Cards",
-    "Employee Insurance Packages",
-    "Working Capital Financing",
-  ],
-  Premium: [
-    "Exclusive Wealth Management Services",
-    "Premium Credit Card Rewards",
-    "High-Value Insurance Policies",
-    "Priority Banking Services",
-    "Retirement Planning Solutions",
-  ],
-  HNI: [
-    "Ultra High Net Worth Investment Plans",
-    "Private Banking Privileges",
-    "Global Investment Opportunities",
-    "Exclusive Mutual Fund Investment Offers",
-    "Bespoke Wealth Management Services",
-  ],
-};
-const selectedMarketingOptions =
-  marketingOptionsByType[customerData.customerType] || [];
 
+  // Dropdown options for new fields
+  const offerTypeOptions = ["Introductory", "Festival", "Loyalty-based", "Referral"];
+  const offerTierOptions = ["Basic", "Premium", "Exclusive"];
+  const interestRateOptions = ["5%", "6%", "7%", "8%"];
+  const processingFeeOptions = ["No Fee", "1%", "2%"];
+  const repaymentTenureOptions = ["6 months", "12 months", "24 months"];
+  const specialConditionsOptions = ["Salaried customers only", "Metro cities only", "No special condition"];
 
+  const subjectLineOptions = ["Promotional", "Informational", "Personalized"];
+  const headerBannerOptions = ["Exciting Offer", "Limited Time", "Special Deal"];
+  const visualsOptions = ["Include Visuals", "No Visuals"];
+  const ctaButtonOptions = ["Apply Now", "Know More", "Book a Call"];
+  const greetingOptions = ["Dear Mr./Ms.", "Hi", "Hello"];
+  const signatureBlockOptions = ["RM Contact Info", "Branch Details", "Company Signature"];
 
+  // Fetch customer data
   useEffect(() => {
     const fetchCustomer = async () => {
-      setLoading(true)
+      setLoading(true);
       try {
         const response = await fetch(`http://localhost:8080/api/customers/${id}`);
         if (response.ok) {
           const data = await response.json();
-          setCustomerData({
+          setCustomerData(prev => ({
+            ...prev,
             fullName: data.fullName,
             email: data.email,
             phone: data.phone,
@@ -83,8 +98,7 @@ const selectedMarketingOptions =
             state: data.state,
             country: data.country,
             pincode: data.pincode,
-            contentRequirement: ""
-          });
+          }));
         } else if (response.status === 404) {
           setError("Customer not found");
         } else {
@@ -95,66 +109,65 @@ const selectedMarketingOptions =
       } finally {
         setLoading(false);
       }
-    
     };
-
     fetchCustomer();
   }, [id]);
 
-  const handleInputChange = (field: string, value: string) => {
-    setCustomerData(prev => ({ ...prev, [field]: value }));
+  // Helper: update contentRequirement as key-value
+  const handleContentRequirementChange = (key: string, value: string) => {
+    const lines = customerData.contentRequirement
+      .split("\n")
+      .filter(line => !line.startsWith(`${key}:`));
+
+    const newLine = `${key}: ${value}`;
+    const updatedContent = [...lines, newLine].join("\n");
+
+    setCustomerData(prev => ({
+      ...prev,
+      contentRequirement: updatedContent,
+    }));
   };
 
+  // Generate content
   const handleGenerateContent = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await fetch("http://localhost:8080/api/marketing/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-              cgid: id,
-              requirement: customerData.contentRequirement,
-              customerType: customerData.customerType // <- new: send selected value
-          }),
-
+        body: JSON.stringify({
+          cgid: id,
+          requirement: customerData.contentRequirement,
+          customerType: customerData.customerType
+        }),
       });
-  
+
       if (response.ok) {
         const data = await response.json();
-        // setGeneratedEmail(data.generatedEmail);
-        console.log(data.generatedEmail)
-        navigate("/suggested-content", { 
-          state: { 
-            customerData, 
-            customerId: id, 
-            generatedEmail: data.generatedEmail 
-          } 
+        navigate("/suggested-content", {
+          state: {
+            customerData,
+            customerId: id,
+            generatedEmail: data.generatedEmail,
+          }
         });
       } else {
         console.error("Failed to generate email");
       }
     } catch (err) {
       console.error("Error calling backend:", err);
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
   };
-  
-
-  // const handleGenerateContent = () => {
-  //   navigate("/suggested-content", { state: { customerData, customerId: id } });
-  // };
 
   return (
-    
-    
     <div className="min-h-screen bg-background p-4">
       {loading && (
-      <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-50">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
-      </div>
-    )}
+        <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-50">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        </div>
+      )}
 
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center space-x-4">
@@ -187,7 +200,7 @@ const selectedMarketingOptions =
               </div>
               <div className="space-y-2">
                 <Label>Gender</Label>
-                <Select value={customerData.gender} onValueChange={(value) => handleInputChange("gender", value)}>
+                <Select value={customerData.gender} onValueChange={(value) => setCustomerData(prev => ({ ...prev, gender: value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
@@ -198,7 +211,7 @@ const selectedMarketingOptions =
               </div>
               <div className="space-y-2">
                 <Label>Customer Type</Label>
-                <Select value={customerData.customerType} onValueChange={(value) => handleInputChange("customerType", value)}>
+                <Select value={customerData.customerType} onValueChange={(value) => setCustomerData(prev => ({ ...prev, customerType: value }))}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
@@ -211,11 +224,7 @@ const selectedMarketingOptions =
 
             {/* Address toggle */}
             <div className="space-y-2">
-              <Button
-                variant="link"
-                className="text-primary hover:text-primary/80 p-0 flex items-center"
-                onClick={() => setShowAddress(!showAddress)}
-              >
+              <Button variant="link" className="text-primary hover:text-primary/80 p-0 flex items-center" onClick={() => setShowAddress(!showAddress)}>
                 <MapPin className="h-4 w-4 mr-1" />
                 {showAddress ? "Hide Address" : "View Address"}
               </Button>
@@ -224,61 +233,106 @@ const selectedMarketingOptions =
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>City</Label>
-                    <Input value={customerData.city} onChange={(e) => handleInputChange("city", e.target.value)} />
+                    <Input value={customerData.city} onChange={(e) => setCustomerData(prev => ({ ...prev, city: e.target.value }))} />
                   </div>
                   <div className="space-y-2">
                     <Label>State</Label>
-                    <Input value={customerData.state} onChange={(e) => handleInputChange("state", e.target.value)} />
+                    <Input value={customerData.state} onChange={(e) => setCustomerData(prev => ({ ...prev, state: e.target.value }))} />
                   </div>
                   <div className="space-y-2">
                     <Label>Country</Label>
-                    <Input value={customerData.country} onChange={(e) => handleInputChange("country", e.target.value)} />
+                    <Input value={customerData.country} onChange={(e) => setCustomerData(prev => ({ ...prev, country: e.target.value }))} />
                   </div>
                   <div className="space-y-2">
                     <Label>Pincode</Label>
-                    <Input value={customerData.pincode} onChange={(e) => handleInputChange("pincode", e.target.value)} />
+                    <Input value={customerData.pincode} onChange={(e) => setCustomerData(prev => ({ ...prev, pincode: e.target.value }))} />
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Describe Content Requirement</h3>
-              {/* ✅ New Dropdown */}
-                <Select 
-                  onValueChange={(value) => handleInputChange("contentRequirement", value)}
-                >
-                  <SelectTrigger className="w-[250px]">
-                    <SelectValue placeholder="Choose marketing option" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {selectedMarketingOptions.map(option => (
-                      <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {/* Marketing Content Requirement */}
+            <div className="space-y-6">
+  <h3 className="text-lg font-semibold">Describe Content Requirement</h3>
+
+  {/* Offer Details */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {[
+      { label: "Marketing Option", options: selectedMarketingOptions },
+      { label: "Offer Type", options: offerTypeOptions },
+      { label: "Offer Tier", options: offerTierOptions },
+      { label: "Interest Rate / ROI", options: interestRateOptions },
+      { label: "Processing Fee / Charges", options: processingFeeOptions },
+      { label: "Repayment Tenure / Lock-In Period", options: repaymentTenureOptions },
+      { label: "Special Conditions", options: specialConditionsOptions },
+    ].map(({ label, options }) => (
+      <div key={label} className="flex flex-col space-y-1">
+        <Label>{label}</Label>
+        <Select onValueChange={(v) => handleContentRequirementChange(label, v)}>
+          <SelectTrigger>
+            <SelectValue placeholder={`Select ${label}`} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((o) => (
+              <SelectItem key={o} value={o}>
+                {o}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    ))}
+  </div>
+
+  {/* Email Content Preferences */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
+    {[
+      { label: "Subject Line Style", options: subjectLineOptions },
+      { label: "Header / Banner Text", options: headerBannerOptions },
+      { label: "Use of Visuals or Icons", options: visualsOptions },
+      { label: "CTA Button Text", options: ctaButtonOptions },
+      { label: "Personalized Greeting", options: greetingOptions },
+      { label: "Signature Block", options: signatureBlockOptions },
+    ].map(({ label, options }) => (
+      <div key={label} className="flex flex-col space-y-1">
+        <Label>{label}</Label>
+        <Select onValueChange={(v) => handleContentRequirementChange(label, v)}>
+          <SelectTrigger>
+            <SelectValue placeholder={`Select ${label}`} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((o) => (
+              <SelectItem key={o} value={o}>
+                {o}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    ))}
+  </div>
+
+
+
+              {/* Textarea */}
               <Textarea
-                placeholder="Describe the marketing content you need for this customer..."
+                placeholder="Content requirement (editable)..."
                 value={customerData.contentRequirement}
-                onChange={(e) => handleInputChange("contentRequirement", e.target.value)}
-                rows={4}
-                className="min-h-[100px]"
+                onChange={(e) => setCustomerData(prev => ({ ...prev, contentRequirement: e.target.value }))}
+                rows={12}
+                className="min-h-[150px] mt-2"
               />
             </div>
-                {customerData.contentRequirement.trim().length >= 0 &&
-            customerData.contentRequirement.trim().length < 10 && (
-              <p className="text-red-600 text-sm mt-1">
-                Content requirement must be at least 10 characters.
-              </p>
-            )}
-            <div className="flex justify-end">
-              <Button onClick={handleGenerateContent} size="lg" className="px-8" disabled={customerData.contentRequirement.trim().length < 10}>
+
+            <div className="flex justify-end mt-4">
+              <Button
+                onClick={handleGenerateContent}
+                size="lg"
+                className="px-8"
+                disabled={customerData.contentRequirement.trim().length < 10}
+              >
                 Generate Content
-                
               </Button>
-              
             </div>
           </CardContent>
         </Card>
