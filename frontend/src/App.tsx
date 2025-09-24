@@ -9,6 +9,8 @@ import CustomerSearch from "./pages/CustomerSearch";
 import CustomerDetails from "./pages/CustomerDetails";
 import SuggestedContent from "./pages/SuggestedContent";
 import NotFound from "./pages/NotFound";
+import SendForApproval from "./pages/SendForApproval";
+
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,7 @@ const App = () => (
             <Route path="/search" element={<CustomerSearch />} />
             <Route path="/customer-details/:id" element={<CustomerDetails />} />
             <Route path="/suggested-content" element={<SuggestedContent />} />
+            <Route path="/send-for-approval" element={<SendForApproval />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
