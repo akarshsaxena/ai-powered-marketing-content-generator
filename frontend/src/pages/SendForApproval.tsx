@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import { useLocation,useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { ArrowLeft, RefreshCw, Send, Pencil } from "lucide-react";
 
 interface EmailEntry {
-  id?: number; // optional since current email may not have DB id yet
+  id?: number;         // optional, if backend doesn’t send, can be removed
+  customerId: string;  // coming from backend
   customerType: string;
   email: string;
   status: string;
-  createdAt?: string;
-  isCurrent?: boolean;
+  createdAt?: string;  // if you later add timestamps
+  isCurrent?: boolean; // frontend only, for UI
 }
+
 
 const SendForApproval = () => {
   const location = useLocation();
@@ -18,67 +21,77 @@ const SendForApproval = () => {
   const [emailList, setEmailList] = useState<EmailEntry[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchEmails = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("http://localhost:8080/api/customers/get-all-emails");
-      const data: EmailEntry[] = await res.json();
 
-      // Add current email as first row if exists
-      const currentEmail: EmailEntry | null = content
-        ? {
-            customerType: customerData?.customerType || "UNKNOWN",
-            email: content,
-            status: "Pending",
-            isCurrent: true,
-          }
-        : null;
+  
+// Fetch all emails from DB
+const fetchEmails = async () => {
+  setLoading(true);
+  try {
+    const res = await fetch("http://localhost:8080/api/customers/get-all-emails");
+    const data: EmailEntry[] = await res.json();
 
-      if (currentEmail) {
-        setEmailList([currentEmail, ...data]);
-      } else {
-        setEmailList(data);
-      }
-    } catch (err) {
-      console.error("Error fetching emails:", err);
-    }
+    // Only use the DB response, no prepending
+    setEmailList(data);
+  } catch (err) {
+    console.error("Error fetching emails:", err);
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
+
 
   useEffect(() => {
     fetchEmails();
   }, []);
 
-  const handleApproveReject = async (entry: EmailEntry, newStatus: string) => {
-    try {
+  // Navigate to AdminApproval page
+  const goToAdminApproval = async (entry: EmailEntry) => {
+  try {
+    // Save entry in DB with status "Pending" only if it's the current unsaved one
+    if (entry.isCurrent) {
       await fetch("http://localhost:8080/api/customers/save-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customerId: customerId || entry.id,
-          customerType: entry.customerType,
+          customerId: entry.customerId,     // take from entry
+          customerType: entry.customerType, // take from entry
           email: entry.email,
-          status: newStatus,
+          status: "Pending",
         }),
       });
-      navigate("/suggested-content", {
-        state: {
-          customerData,
-          customerId,
-          generatedEmail: content, // so SuggestedContent still sees the email
-          approved: newStatus == "Approved",          // 👈 flag to enable Send
-        },
-      });
-      fetchEmails(); // Refresh table after update
-    } catch (err) {
-      console.error("Error updating status:", err);
     }
-  };
+
+    // Navigate with correct data
+    navigate("/AdminAproval", {
+      state: {
+        customerId: entry.customerId,       // from API
+        customerData: {                     // build customerData object
+          customerType: entry.customerType,
+        },
+        generatedEmail: entry.email,
+      },
+    });
+
+    fetchEmails(); // refresh table after save
+  } catch (err) {
+    console.error("Error saving pending email:", err);
+  }
+};
+
 
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold">Email Approvals</h1>
-
+      <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/")}
+            className="hover:bg-muted"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
       {loading ? (
         <p>Loading...</p>
       ) : (
@@ -89,31 +102,28 @@ const SendForApproval = () => {
                 <th className="border p-2">Customer Type</th>
                 <th className="border p-2">Email</th>
                 <th className="border p-2">Status</th>
-                <th className="border p-2">Actions</th>
+                <th className="border p-2">Action</th>
               </tr>
             </thead>
             <tbody>
               {emailList.map((entry, index) => (
-                <tr key={index} className="odd:bg-white even:bg-gray-50">
+                <tr
+                  key={index}
+                  className={`odd:bg-white even:bg-gray-50 ${
+                    entry.isCurrent ? "font-semibold" : ""
+                  }`}
+                >
                   <td className="border p-2">{entry.customerType}</td>
                   <td className="border p-2 break-words">{entry.email}</td>
                   <td className="border p-2">{entry.status}</td>
-                  <td className="border p-2 flex gap-2">
-                    {entry.isCurrent ? (
-                      <>
-                        <Button
-                          onClick={() => handleApproveReject(entry, "Approved")}
-                          className="bg-green-600 hover:bg-green-700 text-white text-sm"
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          onClick={() => handleApproveReject(entry, "Rejected")}
-                          className="bg-red-600 hover:bg-red-700 text-white text-sm"
-                        >
-                          Reject
-                        </Button>
-                      </>
+                  <td className="border p-2">
+                    {entry.status === "Pending" ? (
+                      <Button
+                        onClick={() => goToAdminApproval(entry)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                      >
+                        Send to Admin for Approval
+                      </Button>
                     ) : (
                       <span className="text-gray-400">-</span>
                     )}

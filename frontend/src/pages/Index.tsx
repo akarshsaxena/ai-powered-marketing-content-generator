@@ -1,20 +1,22 @@
-import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button"; // if you're using shadcn/ui
 
 const Index = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Redirect to customer search page on app load
-    navigate("/search");
-  }, [navigate]);
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Loading MarketingIQ...</h1>
-        <p className="text-xl text-muted-foreground">Redirecting to customer search...</p>
-      </div>
+    <div className="flex flex-col items-center justify-center gap-4 h-screen">
+      <h1 className="text-2xl font-bold">Welcome</h1>
+      
+      {/* Banker Button */}
+      <Button onClick={() => navigate("/search")}>
+        Go to Customer Search (Banker)
+      </Button>
+
+      {/* Admin Button */}
+      <Button onClick={() => navigate("/send-for-approval")} variant="secondary">
+        Go to Send for Approval (Admin)
+      </Button>
     </div>
   );
 };

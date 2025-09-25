@@ -1,13 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowLeft, RefreshCw, Send, Pencil } from "lucide-react";
+import { ArrowLeft, XCircle, Send, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 
-const SuggestedContent = () => {
+const AdminAproval = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { customerData, customerId, generatedEmail } = location.state || {};
@@ -15,84 +15,71 @@ const SuggestedContent = () => {
   const [content, setContent] = useState(generatedEmail || "");
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [sendEnabled, setSendEnabled] = useState(false); // controls Send button
 
   const qualityScore = 92;
 
-  const handleSendForApproval = async () => {
+  // Store approval/rejection status in DB
+  const handleStatusUpdate = async (status: "Approved" | "Rejected") => {
+    console.log(customerData, customerId, content, status);
     setLoading(true);
     try {
-      // Save to DB with Pending status
       const response = await fetch("http://localhost:8080/api/customers/save-status", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           customerId,
-          customerType: customerData?.customerType,
+          customerType: customerData?.customerType || "UNKNOWN",
           email: content,
-          status: "Pending",
+          status,
         }),
       });
 
       if (response.ok) {
-        toast.success("Email sent for approval!");
-        // Navigate back to CustomerDetails page
-        navigate(`/customer-details/${customerId}`);
+        toast.success(`Content ${status.toLowerCase()} successfully!`);
+        if (status === "Approved") setSendEnabled(true);
+        if (status === "Rejected") navigate(`/customer-details/${customerId}`);
       } else {
-        toast.error("Failed to send for approval. Try again.");
-      }
-    } catch (err) {
-      console.error("Error sending for approval:", err);
-      toast.error("Error sending for approval.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRegenerate = async () => {
-    toast.info("Regenerating content...");
-    setLoading(true);
-
-    try {
-      const response = await fetch("http://localhost:8080/api/marketing/regenerate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          cgid: customerId,
-          requirement: content,
-          editedContent: content,
-          customerType: customerData?.customerType,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setContent(data.generatedEmail || data.email || "");
-        toast.success("Content regenerated successfully!");
-      } else {
-        toast.error("Failed to regenerate content. Try again.");
+        toast.error("Failed to update status. Try again.");
       }
     } catch (error) {
       console.error(error);
-      toast.error("Error while regenerating content.");
+      toast.error("Error while updating status.");
     } finally {
       setLoading(false);
     }
   };
 
-  if (!customerData) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card>
-          <CardContent className="p-8 text-center">
-            <p>No customer data found. Please start from customer search.</p>
-            <Button onClick={() => navigate("/")} className="mt-4">
-              Go to Customer Search
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
+// Updated handleSend
+const handleSend = async () => {
+  setLoading(true);
+  try {
+    const response = await fetch("http://localhost:8080/api/marketing/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cgid: customerId,
+        subject: `Special Offer That You Cannot Miss`,
+        bodyHtml: content,
+      }),
+    });
+
+    if (response.ok) {
+      toast.success("Email sent successfully!");
+      // After sending, go back to SendForApproval page
+      navigate("/send-for-approval", {
+        state: { customerData, customerId }, // pass whatever is needed
+      });
+    } else {
+      toast.error("Failed to send email. Try again.");
+    }
+  } catch (error) {
+    toast.error("Error while sending email.");
+  } finally {
+    setLoading(false);
   }
+};
+
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -119,7 +106,7 @@ const SuggestedContent = () => {
         <Card className="shadow-lg">
           <CardHeader className="flex items-center justify-between">
             <CardTitle className="text-xl">
-              Generated Content for {customerData.firstName} {customerData.lastName} ({customerId})
+              {/* Generated Content for {customerData.firstName} {customerData.lastName} ({customerId}) */}
             </CardTitle>
             <Button
               size="sm"
@@ -148,23 +135,34 @@ const SuggestedContent = () => {
             </div>
 
             <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
-              {/* Send for Approval */}
+              {/* Reject */}
               <Button
-                onClick={handleSendForApproval}
+                onClick={() => handleStatusUpdate("Rejected")}
+                variant="outline"
+                className="flex items-center space-x-2 hover:bg-destructive hover:text-destructive-foreground"
+              >
+                <XCircle className="h-4 w-4" />
+                <span>Reject</span>
+              </Button>
+
+              {/* Accept */}
+              <Button
+                onClick={() => handleStatusUpdate("Approved")}
+                variant="outline"
                 className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Send className="h-4 w-4" />
-                <span>Send for Approval</span>
+                <span>Accept</span>
               </Button>
 
-              {/* Regenerate */}
+              {/* Send - disabled until Approved */}
               <Button
-                onClick={handleRegenerate}
-                variant="outline"
-                className="flex items-center space-x-2 border-warning text-warning hover:bg-warning hover:text-warning-foreground"
+                onClick={handleSend}
+                disabled={!sendEnabled}
+                className="flex items-center space-x-2 bg-green-600 hover:bg-green-700 text-white"
               >
-                <RefreshCw className="h-4 w-4" />
-                <span>Regenerate</span>
+                <Send className="h-4 w-4" />
+                <span>Send</span>
               </Button>
             </div>
 
@@ -181,5 +179,4 @@ const SuggestedContent = () => {
   );
 };
 
-export default SuggestedContent;
-``
+export default AdminAproval;
