@@ -29,6 +29,7 @@ public class CustomerController {
     public ResponseEntity<?> saveStatus(@RequestBody SaveStatusRequest request) {
         return ResponseEntity.ok(
                 customerService.saveStatus(
+                        request.getId(),
                         request.getCustomerId(),
                         request.getCustomerType(),
                         request.getEmail(),

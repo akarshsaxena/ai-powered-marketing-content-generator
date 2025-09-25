@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class SaveStatusRequest {
+    private Long id;
     private String customerId;
     private String customerType;
     private String email;

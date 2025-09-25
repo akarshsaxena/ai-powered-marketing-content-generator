@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { ArrowLeft, RefreshCw, Send, Pencil } from "lucide-react";
 
 interface EmailEntry {
@@ -39,11 +40,55 @@ const fetchEmails = async () => {
   }
 };
 
+const handleSend = async (entry:EmailEntry) => {
+  setLoading(true);
+  try {
+    const response = await fetch("http://localhost:8080/api/marketing/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cgid: entry.customerId,
+        subject: `Special Offer That You Cannot Miss`,
+        bodyHtml: entry.email,
+      }),
+    });
+
+    if (response.ok) {
+      toast.success("Email sent successfully!");
+      // After sending, go back to SendForApproval page
+      await fetch("http://localhost:8080/api/customers/save-status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id:entry.id,
+          customerId: entry.customerId,     // take from entry
+          customerType: entry.customerType, // take from entry
+          email: entry.email,
+          status: "SENT",
+        }),
+      });
+      // navigate("/send-for-approval", {
+      //   state: { customerData, customerId }, // pass whatever is needed
+      // });
+    } else {
+      toast.error("Failed to send email. Try again.");
+    }
+  } catch (error) {
+    toast.error("Error while sending email.");
+  } finally {
+    setLoading(false);
+  }
+};
 
 
-  useEffect(() => {
-    fetchEmails();
-  }, []);
+
+useEffect(() => {
+  fetchEmails(); // initial load
+  const interval = setInterval(fetchEmails, 5000); // poll every 5 sec
+  return () => clearInterval(interval); // cleanup on unmount
+}, []);
+``
+
 
   // Navigate to AdminApproval page
   const goToAdminApproval = async (entry: EmailEntry) => {
@@ -54,6 +99,7 @@ const fetchEmails = async () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id:entry.id,
           customerId: entry.customerId,     // take from entry
           customerType: entry.customerType, // take from entry
           email: entry.email,
@@ -65,6 +111,7 @@ const fetchEmails = async () => {
     // Navigate with correct data
     navigate("/AdminAproval", {
       state: {
+        id:entry.id,
         customerId: entry.customerId,       // from API
         customerData: {                     // build customerData object
           customerType: entry.customerType,
@@ -106,31 +153,47 @@ const fetchEmails = async () => {
               </tr>
             </thead>
             <tbody>
-              {emailList.map((entry, index) => (
-                <tr
-                  key={index}
-                  className={`odd:bg-white even:bg-gray-50 ${
-                    entry.isCurrent ? "font-semibold" : ""
-                  }`}
-                >
-                  <td className="border p-2">{entry.customerType}</td>
-                  <td className="border p-2 break-words">{entry.email}</td>
-                  <td className="border p-2">{entry.status}</td>
-                  <td className="border p-2">
-                    {entry.status === "Pending" ? (
-                      <Button
-                        onClick={() => goToAdminApproval(entry)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
-                      >
-                        Send to Admin for Approval
-                      </Button>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+  {emailList.map((entry, index) => (
+    <tr
+      key={entry.id || index}
+      className={`
+        odd:bg-white even:bg-gray-50
+        ${entry.status === "Approved" ? "bg-green-100 text-green-800" : ""}
+        ${entry.status === "Rejected" ? "bg-red-100 text-red-800" : ""}
+        ${entry.isCurrent ? "font-semibold" : ""}
+      `}
+    >
+      <td className="border p-2">{entry.customerType}</td>
+      <td className="border p-2 break-words">{entry.email}</td>
+      <td className="border p-2">{entry.status}</td>
+      <td className="border p-2">
+        {entry.status === "Pending" && (
+          <Button
+            onClick={() => goToAdminApproval(entry)}
+            className="bg-blue-600 hover:bg-blue-700 text-white text-sm"
+          >
+            Approve / Reject
+          </Button>
+        )}
+        {entry.status === "Approved" && (
+          <Button
+            onClick={() => handleSend(entry)}
+            className="bg-green-600 hover:bg-green-700 text-white text-sm"
+          >
+            Send
+          </Button>
+        )}
+        {entry.status === "Rejected" && (
+          <span className="text-red-600 font-medium">Rejected</span>
+        )}
+         {entry.status === "Sent" && (
+          <span className="text-greed-600 font-medium">Email Sent</span>
+        )}
+      </td>
+    </tr>
+  ))}
+</tbody>
+
           </table>
         </div>
       )}

@@ -171,6 +171,8 @@ public String generateEmail(String cgid, String requirement, String overrideCust
     %s  # contentRequirement from frontend
 
     Guidelines:
+    - In the response only give the email in the format Subject : then body.
+    - Do not include AI response in message like ok here is it and all anywhere in the response
     - Use the customer name in greeting according to 'Personalized Greeting'.
     - Tailor tone according to customer type (%s).
     - Keep tone professional, engaging, and concise.

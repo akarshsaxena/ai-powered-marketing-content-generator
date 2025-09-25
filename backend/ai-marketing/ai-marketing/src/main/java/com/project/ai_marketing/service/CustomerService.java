@@ -51,20 +51,27 @@ public class CustomerService {
                 .build();
     }
 
-    public MarketingRequests saveStatus(String customerId,String customerType, String email, String status) {
+    public MarketingRequests saveStatus(Long id,String customerId,String customerType, String email, String status) {
         MarketingRequests entry = MarketingRequests.builder()
                 .customerId(customerId)
                 .customerType(customerType)
                 .email(email)
                 .status(status)
                 .build();
+
+        if (id != null) {
+            entry.setId(id);
+        }
+
         return marketingRequestRepository.save(entry);
+
     }
 
     public List<AllEmailResponse> getAllEmails() {
         return marketingRequestRepository.findAll()
                 .stream()
                 .map(req -> new AllEmailResponse(
+                        req.getId(),
                         req.getCustomerId(),
                         req.getCustomerType(),
                         req.getEmail(),

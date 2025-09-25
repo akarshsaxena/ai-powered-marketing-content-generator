@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 const AdminAproval = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { customerData, customerId, generatedEmail } = location.state || {};
+  const { id,customerData, customerId, generatedEmail } = location.state || {};
 
   const [content, setContent] = useState(generatedEmail || "");
   const [isEditing, setIsEditing] = useState(false);
@@ -28,6 +28,7 @@ const AdminAproval = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id,
           customerId,
           customerType: customerData?.customerType || "UNKNOWN",
           email: content,
@@ -37,8 +38,8 @@ const AdminAproval = () => {
 
       if (response.ok) {
         toast.success(`Content ${status.toLowerCase()} successfully!`);
-        if (status === "Approved") setSendEnabled(true);
-        if (status === "Rejected") navigate(`/customer-details/${customerId}`);
+        if (status === "Approved") navigate("/send-for-approval")
+        if (status === "Rejected") navigate("/send-for-approval")
       } else {
         toast.error("Failed to update status. Try again.");
       }
@@ -94,7 +95,7 @@ const handleSend = async () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/customer-details/${customerId}`)}
+            onClick={() => navigate("/send-for-approval")}
             className="hover:bg-muted"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -152,10 +153,10 @@ const handleSend = async () => {
                 className="flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Send className="h-4 w-4" />
-                <span>Accept</span>
+                <span>Approve</span>
               </Button>
 
-              {/* Send - disabled until Approved */}
+              {/* Send - disabled until Approved
               <Button
                 onClick={handleSend}
                 disabled={!sendEnabled}
@@ -163,7 +164,7 @@ const handleSend = async () => {
               >
                 <Send className="h-4 w-4" />
                 <span>Send</span>
-              </Button>
+              </Button> */}
             </div>
 
             <Alert className="bg-green-50 border-green-200 text-green-800">

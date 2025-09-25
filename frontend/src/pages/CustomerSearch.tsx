@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowLeft, MapPin } from "lucide-react";
 import { Search } from "lucide-react";
 
 const CustomerSearch = () => {
@@ -25,6 +26,10 @@ const CustomerSearch = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
+      <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="hover:bg-muted">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
         <Card className="shadow-lg">
           <CardHeader className="text-center space-y-4">
             <div className="flex items-center justify-center space-x-2">
