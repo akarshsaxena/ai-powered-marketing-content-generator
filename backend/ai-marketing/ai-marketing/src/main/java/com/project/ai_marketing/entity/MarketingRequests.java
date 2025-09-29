@@ -22,6 +22,9 @@ public class MarketingRequests {
     @Column(name = "customer_type", nullable = false)
     private String customerType;
 
+    @Column(name = "product_type")
+    private String productType;
+
     @Column(name = "email", nullable = false, columnDefinition = "TEXT")
     private String email;
 

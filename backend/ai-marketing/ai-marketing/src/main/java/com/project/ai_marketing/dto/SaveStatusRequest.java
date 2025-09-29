@@ -13,6 +13,7 @@ public class SaveStatusRequest {
     private Long id;
     private String customerId;
     private String customerType;
+    private String productType;
     private String email;
     private String status;
 }

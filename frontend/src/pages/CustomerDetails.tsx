@@ -28,6 +28,8 @@ const CustomerDetails = () => {
     contentRequirement: "",
   });
 
+  const [productType,setProductType] = useState("");
+
   const marketingOptionsByType: Record<string, string[]> = {
     Regular: [
       "Personal Loan Offers",
@@ -115,6 +117,9 @@ const CustomerDetails = () => {
 
   // Helper: update contentRequirement as key-value
   const handleContentRequirementChange = (key: string, value: string) => {
+    if(key === "Marketing Option"){
+      setProductType(value);
+    }
     const lines = customerData.contentRequirement
       .split("\n")
       .filter(line => !line.startsWith(`${key}:`));
@@ -148,6 +153,7 @@ const CustomerDetails = () => {
           state: {
             customerData,
             customerId: id,
+            productType: productType,
             generatedEmail: data.generatedEmail,
           }
         });

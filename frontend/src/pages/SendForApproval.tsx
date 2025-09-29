@@ -8,6 +8,7 @@ interface EmailEntry {
   id?: number;         // optional, if backend doesn’t send, can be removed
   customerId: string;  // coming from backend
   customerType: string;
+  productType: string,
   email: string;
   status: string;
   createdAt?: string;  // if you later add timestamps
@@ -63,6 +64,7 @@ const handleSend = async (entry:EmailEntry) => {
           id:entry.id,
           customerId: entry.customerId,     // take from entry
           customerType: entry.customerType, // take from entry
+          productType: entry.productType,
           email: entry.email,
           status: "SENT",
         }),
@@ -84,7 +86,7 @@ const handleSend = async (entry:EmailEntry) => {
 
 useEffect(() => {
   fetchEmails(); // initial load
-  const interval = setInterval(fetchEmails, 5000); // poll every 5 sec
+  const interval = setInterval(fetchEmails, 2000); // poll every25 sec
   return () => clearInterval(interval); // cleanup on unmount
 }, []);
 ``
@@ -93,6 +95,7 @@ useEffect(() => {
   // Navigate to AdminApproval page
   const goToAdminApproval = async (entry: EmailEntry) => {
   try {
+    console.log(entry)
     // Save entry in DB with status "Pending" only if it's the current unsaved one
     if (entry.isCurrent) {
       await fetch("http://localhost:8080/api/customers/save-status", {
@@ -102,6 +105,7 @@ useEffect(() => {
           id:entry.id,
           customerId: entry.customerId,     // take from entry
           customerType: entry.customerType, // take from entry
+          productType: entry.productType,
           email: entry.email,
           status: "Pending",
         }),
@@ -116,6 +120,7 @@ useEffect(() => {
         customerData: {                     // build customerData object
           customerType: entry.customerType,
         },
+        productType: entry.productType,
         generatedEmail: entry.email,
       },
     });
@@ -139,9 +144,13 @@ useEffect(() => {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
+          {loading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-50">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        </div>
+      )}
+
+      
         <div className="overflow-x-auto">
           <table className="w-full border-collapse border border-gray-300">
             <thead>
@@ -196,7 +205,7 @@ useEffect(() => {
 
           </table>
         </div>
-      )}
+      
     </div>
   );
 };

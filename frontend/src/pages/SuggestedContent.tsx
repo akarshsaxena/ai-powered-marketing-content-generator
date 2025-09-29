@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 const SuggestedContent = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { customerData, customerId, generatedEmail } = location.state || {};
+  const { customerData, customerId, productType, generatedEmail } = location.state || {};
 
   const [content, setContent] = useState(generatedEmail || "");
   const [isEditing, setIsEditing] = useState(false);
@@ -28,6 +28,7 @@ const SuggestedContent = () => {
         body: JSON.stringify({
           customerId,
           customerType: customerData?.customerType,
+          productType: productType,
           email: content,
           status: "Pending",
         }),

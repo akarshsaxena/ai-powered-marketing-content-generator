@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 const AdminAproval = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { id,customerData, customerId, generatedEmail } = location.state || {};
+  const { id,customerData, customerId, productType, generatedEmail } = location.state || {};
 
   const [content, setContent] = useState(generatedEmail || "");
   const [isEditing, setIsEditing] = useState(false);
@@ -21,7 +21,7 @@ const AdminAproval = () => {
 
   // Store approval/rejection status in DB
   const handleStatusUpdate = async (status: "Approved" | "Rejected") => {
-    console.log(customerData, customerId, content, status);
+    console.log(customerData, customerId,productType, content, status);
     setLoading(true);
     try {
       const response = await fetch("http://localhost:8080/api/customers/save-status", {
@@ -31,6 +31,7 @@ const AdminAproval = () => {
           id,
           customerId,
           customerType: customerData?.customerType || "UNKNOWN",
+          productType: productType,
           email: content,
           status,
         }),
@@ -71,6 +72,7 @@ const handleSend = async () => {
       navigate("/send-for-approval", {
         state: { customerData, customerId }, // pass whatever is needed
       });
+      setLoading(false);
     } else {
       toast.error("Failed to send email. Try again.");
     }

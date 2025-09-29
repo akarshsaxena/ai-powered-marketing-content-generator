@@ -9,6 +9,7 @@ import com.project.ai_marketing.repository.MarketingRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -51,10 +52,11 @@ public class CustomerService {
                 .build();
     }
 
-    public MarketingRequests saveStatus(Long id,String customerId,String customerType, String email, String status) {
+    public MarketingRequests saveStatus(Long id,String customerId,String customerType, String productType,String email, String status) {
         MarketingRequests entry = MarketingRequests.builder()
                 .customerId(customerId)
                 .customerType(customerType)
+                .productType(productType)
                 .email(email)
                 .status(status)
                 .build();
@@ -68,16 +70,21 @@ public class CustomerService {
     }
 
     public List<AllEmailResponse> getAllEmails() {
-        return marketingRequestRepository.findAll()
+        List<AllEmailResponse> responses = marketingRequestRepository.findAll()
                 .stream()
                 .map(req -> new AllEmailResponse(
                         req.getId(),
                         req.getCustomerId(),
                         req.getCustomerType(),
+                        req.getProductType(),
                         req.getEmail(),
                         req.getStatus()
                 ))
                 .collect(Collectors.toList());
+
+        Collections.reverse(responses);
+        return responses;
+
 
     }
 
