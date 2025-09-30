@@ -15,7 +15,7 @@ const Index = () => {
 
       {/* Admin Button */}
       <Button onClick={() => navigate("/send-for-approval")} variant="secondary">
-        Go to Send for Approval (Admin)
+        Go to Send for Approval (Campaign Manager)
       </Button>
     </div>
   );
