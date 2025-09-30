@@ -79,8 +79,8 @@ const CustomerDetails = () => {
   const visualsOptions = ["Include Visuals", "No Visuals"];
   const ctaButtonOptions = ["Apply Now", "Know More", "Book a Call"];
   const greetingOptions = ["Dear Mr./Ms.", "Hi", "Hello"];
-  const signatureBlockOptions = ["RM Contact Info", "Branch Details", "Company Signature"];
-
+  // const signatureBlockOptions = ["RM Contact Info", "Branch Details", "Company Signature"];
+  const signatureBlockOptions=["The NAB Team"];
   // Fetch customer data
   useEffect(() => {
     const fetchCustomer = async () => {
