@@ -86,7 +86,7 @@ const handleSend = async (entry:EmailEntry) => {
 
 useEffect(() => {
   fetchEmails(); // initial load
-  const interval = setInterval(fetchEmails, 2000); // poll every25 sec
+  const interval = setInterval(fetchEmails, 5000); // poll every25 sec
   return () => clearInterval(interval); // cleanup on unmount
 }, []);
 ``
