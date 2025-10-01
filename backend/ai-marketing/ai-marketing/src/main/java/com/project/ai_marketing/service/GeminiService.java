@@ -172,7 +172,8 @@ public String generateEmail(String cgid, String requirement, String overrideCust
 
     Guidelines:
     - In the response only give the email in the format Subject : then body.
-    - Do not include AI response in message like ok here is it and all anywhere in the response
+    - Do not include AI response in message like ok here is it and all anywhere in the response also dont include content requirement options key like "Header Banner, "CTA Button" names , make the email such that it is complete requiring no modifcation
+    - Make sure that the email looks professional and does not contain any unformated information. The email should be ready to be sent
     - Use the customer name in greeting according to 'Personalized Greeting'.
     - Tailor tone according to customer type (%s).
     - Keep tone professional, engaging, and concise.
