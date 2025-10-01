@@ -235,4 +235,105 @@ public String generateEmail(String cgid, String requirement, String overrideCust
     }
         return "No response from Gemini.";
     }
+
+
+    public String regenerateEmail(String cgid, String requirement, String overrideCustomerType) {
+        Customer customer = customerRepository.findByCgid(cgid)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        // use UI override if provided, otherwise DB value
+        String effectiveCustomerType = (overrideCustomerType != null && !overrideCustomerType.isBlank())
+                ? overrideCustomerType
+                : customer.getCustomerType();
+
+        String bankName = "NAB";
+        String prompt = """
+    You are an AI assistant specialized in personalized marketing. 
+    Re-Generate the email since the email you gave i.e. requirement : %s: was not up to the mark
+
+    Customer Details:
+    - Full Name: %s
+    - Gender: %s
+    - Customer Type: %s
+    - Location: %s, %s, %s, %s
+    - Age Group: %s
+    - Income Bracket: %s
+    - Profession: %s
+    - Spending Patterns: %s
+    - Loan History: %s
+    - Investment Preferences: %s
+    - Digital Engagement Level: %s
+    - Preferred Communication Channel: %s
+
+    Marketing & Email Preferences (key-value format):
+    %s  # contentRequirement from frontend
+
+    Guidelines:
+    - In the response only give the email in the format Subject : then body.
+    - Do not include AI response in message like ok here is it and all anywhere in the response also dont include content requirement options key like "Header Banner, "CTA Button" names , make the email such that it is complete requiring no modifcation
+    - Make sure that the email looks professional and does not contain any unformated information. The email should be ready to be sent
+    - Use the customer name in greeting according to 'Personalized Greeting'.
+    - Tailor tone according to customer type (%s).
+    - Keep tone professional, engaging, and concise.
+    - Include subject line, header/banner, body text, CTA button, and signature according to the provided keys.
+    - Mention the offer details naturally in the email.
+    - Include instructions for visuals if specified.
+    - Do not reveal PII like email/phone directly.
+    - Generate a complete email ready to send.
+    """.formatted(
+                requirement,
+                customer.getFullName(),
+                customer.getGender(),
+                effectiveCustomerType,
+                customer.getCity(),
+                customer.getState(),
+                customer.getCountry(),
+                customer.getPincode(),
+                customer.getAgeGroup(),
+                customer.getIncomeBracket(),
+                customer.getProfession(),
+                customer.getSpendingPatterns(),
+                customer.getLoanHistory(),
+                customer.getInvestmentPreferences(),
+                customer.getDigitalEngagementLevel(),
+                customer.getPreferredChannel(),
+                requirement,
+                effectiveCustomerType
+        );
+
+
+        log.info("GEMINI prompt - {}", prompt);
+
+        Map<String, Object> requestBody = Map.of(
+                "contents", List.of(
+                        Map.of("parts", List.of(
+                                Map.of("text", prompt)
+                        ))
+                )
+        );
+
+        String url = apiUrl + "?key=" + apiKey;
+
+        Map<String, Object> response =
+                restTemplate.postForObject(url, requestBody, Map.class);
+
+        if (response != null && response.containsKey("candidates")) {
+            log.info("GEMINI response - {}", response);
+
+            Map<String, Object> candidate = ((List<Map<String, Object>>) response.get("candidates")).get(0);
+            Map<String, Object> content = (Map<String, Object>) candidate.get("content");
+            List<Map<String, Object>> parts = (List<Map<String, Object>>) content.get("parts");
+
+            String rawText = (String) parts.get(0).get("text");
+
+            // Optional: clean up the text for HTML display
+            // 1. Replace Markdown headers with HTML
+            String formattedText = rawText;
+
+            return formattedText;
+        }
+        return "No response from Gemini.";
+    }
 }
+
+

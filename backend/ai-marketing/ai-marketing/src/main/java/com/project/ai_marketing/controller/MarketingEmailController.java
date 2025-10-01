@@ -40,7 +40,7 @@ public class MarketingEmailController {
                 ? request.getEditedContent()
                 : request.getRequirement();
 
-        String regeneratedEmail = geminiService.generateEmail(request.getCgid(), input, request.getCustomerType());
+        String regeneratedEmail = geminiService.regenerateEmail(request.getCgid(), input, request.getCustomerType());
 
 
         return ResponseEntity.ok(new MarketingEmailResponse(regeneratedEmail));
